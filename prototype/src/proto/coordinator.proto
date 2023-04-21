@@ -1,0 +1,140 @@
+// Copyright 2015 gRPC authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package coordinator_proto;
+
+// The greeting service definition.
+service CoordinatorService {
+  // Sends a greeting
+  rpc sayHelloToCoordinator (RequestToCoordinator) returns (ReplyFromCoordinator) {};
+  rpc uploadOriginKeyValue (RequestProxyIPPort) returns (ReplyProxyIPPort){};
+  rpc checkalive (RequestToCoordinator) returns (ReplyFromCoordinator) {};
+  rpc reportCommitAbort (CommitAbortKey) returns (ReplyFromCoordinator){};
+  rpc checkCommitAbort (AskIfSetSucess) returns (RepIfSetSucess){};
+  rpc getValue(KeyAndClientIP) returns(RepIfGetSucess){};
+  rpc setParameter(Parameter) returns(RepIfSetParaSucess) {};
+  rpc requestRepair(FailNodes) returns(RepIfRepairSucess) {};
+  
+  //update
+  rpc updateGetLocation(UpdatePrepareRequest) returns(UpdateDataLocation){};
+  rpc checkBias(myVoid) returns(checkBiasResult) {};
+
+  rpc simulate_d_read(d_read_para) returns(d_read_result) {};
+}
+
+message d_read_para {
+  string key = 1;
+}
+
+message d_read_result {
+  bool un_use = 1;
+}
+
+message myVoid {
+  bool un_use = 1;
+}
+
+message checkBiasResult {
+  double node_storage_bias = 1;
+  double node_network_bias = 2;
+  double az_storage_bias = 3;
+  double az_network_bias = 4;
+  double cross_repair_traffic = 5;
+  double degraded_time = 6;
+  double all_time = 7;
+}
+
+message FailNodes {
+  repeated int32 node_list = 1;
+}
+
+message RepIfRepairSucess {
+  bool ifrepair = 1;
+}
+
+message Parameter {
+  bool partial_decoding = 1;
+  int32 encodetype = 2;
+  int32 placementtype = 3;
+  int32 k_datablock = 4;
+  int32 real_l_localgroup = 5;
+  int32 g_m_globalparityblock = 6;
+  int32 b_datapergoup = 7;
+  int32 small_file_upper = 8;
+  int32 blob_size_upper = 9;
+  int32 alpha = 10;
+}
+
+message RepIfSetParaSucess {
+  bool ifsetparameter = 1;
+}
+
+// The request message containing the user's name.
+message RequestToCoordinator {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message ReplyFromCoordinator {
+  string message = 1;
+}
+
+message RequestProxyIPPort{
+  string key = 1;
+  int32 valuesizebytes = 2;
+}
+
+message ReplyProxyIPPort{
+  string proxyIP = 1;
+  int32 proxyPort = 2;
+}
+
+message CommitAbortKey{
+  string key = 1;
+  bool ifcommitMetaData = 2; 
+}
+message AskIfSetSucess{
+  string key = 1;
+}
+message RepIfSetSucess{
+  bool ifcommit = 1;
+}
+
+message KeyAndClientIP{
+  string key = 1;
+  string clientip = 2;
+  int32 clientport = 3;
+}
+message RepIfGetSucess{
+  bool ifgetsucess = 1;
+  int32 valuesizebytes = 2;
+}
+message UpdatePrepareRequest{
+  string key=1;
+  int32 offset=2;
+  int32 length=3;
+}
+message UpdateDataLocation{
+  string key=1;
+  int32 stripeid=2;
+  repeated string proxyip=3;
+  repeated int32 proxyport=4;
+  repeated int32 num_each_proxy=5;
+  repeated int32 datashardidx=6;
+  repeated int32 offsetinshard=7;
+  repeated int32 lengthinshard=8;
+  int32 update_operation_id=9;
+}

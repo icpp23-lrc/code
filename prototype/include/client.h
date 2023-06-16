@@ -30,8 +30,6 @@ public:
   bool get(std::string key, std::string &value);
   bool repair(std::vector<int> failed_node_list);
 
-  // update
-  bool update(std::string key, int offset, int length);
   bool checkBias(double &node_storage_bias, double &node_network_bias,
                  double &az_storage_bias, double &az_network_bias,
                  double &cross_repair_traffic, double &degraded_time,

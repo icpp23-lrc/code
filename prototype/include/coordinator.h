@@ -69,11 +69,6 @@ public:
       std::vector<std::pair<int, int>> &new_locations_with_shard_idx,
       std::unordered_map<int, bool> &merge);
 
-  // update
-  grpc::Status updateGetLocation(
-      ::grpc::ServerContext *context,
-      const coordinator_proto::UpdatePrepareRequest *request,
-      coordinator_proto::UpdateDataLocation *data_location) override;
   grpc::Status checkBias(::grpc::ServerContext *context,
                          const ::coordinator_proto::myVoid *request,
                          ::coordinator_proto::checkBiasResult *response);

@@ -74,49 +74,11 @@ bool OppoProject::encode(int k, int m, int real_l, char **data_ptrs,
                          EncodeType encode_type) {
   int *matrix;
   matrix = reed_sol_vandermonde_coding_matrix(k, m, 8);
-  if (encode_type == RS) {
-    jerasure_matrix_encode(k, m, 8, matrix, data_ptrs, coding_ptrs, blocksize);
-  } else if (encode_type == Azure_LRC_1 || encode_type == Azure_LRC) {
+  if (encode_type == Azure_LRC) {
     std::vector<int> new_matrix((m + real_l) * k, 0);
     lrc_make_matrix(k, m, real_l, new_matrix.data());
     jerasure_matrix_encode(k, m + real_l, 8, new_matrix.data(), data_ptrs,
                            coding_ptrs, blocksize);
-
-    if (encode_type == Azure_LRC_1) {
-      // 生成全局校验块的局部校验块
-      std::vector<int> last_matrix(m, 1);
-      jerasure_matrix_encode(m, 1, 8, last_matrix.data(), coding_ptrs,
-                             &coding_ptrs[m + real_l], blocksize);
-    }
-  } else if (encode_type == OPPO_LRC) {
-    int r = (k + real_l - 1) / real_l;
-    jerasure_matrix_encode(k, m, 8, matrix, data_ptrs, coding_ptrs, blocksize);
-    std::vector<int> az_g_number(real_l, 0);
-    std::vector<int> az_data_number(real_l, 0);
-    for (int i = 0; i < m; i++) {
-      az_g_number[i % real_l] += 1;
-    }
-    for (int i = 0; i < real_l; i++) {
-      az_data_number[i] = std::min(k - i * r, r);
-    }
-    int g_sum = 0;
-    for (int i = 0; i < az_g_number.size(); i++) {
-      std::vector<char *> vecotraz_g_number(az_data_number[i] + az_g_number[i]);
-      char **new_data = (char **)vecotraz_g_number.data();
-
-      for (int j = 0; j < az_data_number[i]; j++) {
-        new_data[j] = data_ptrs[i * r + j];
-      }
-      for (int j = 0; j < az_g_number[i]; j++) {
-        new_data[az_data_number[i] + j] = coding_ptrs[g_sum + j];
-      }
-
-      int shard_number_az = az_data_number[i] + az_g_number[i];
-      std::vector<int> last_matrix(shard_number_az, 1);
-      jerasure_matrix_encode(shard_number_az, 1, 8, last_matrix.data(),
-                             new_data, &coding_ptrs[m + i], blocksize);
-      g_sum += az_g_number[i];
-    }
   }
   free(matrix);
   return true;
@@ -126,18 +88,7 @@ bool OppoProject::decode(int k, int m, int real_l, char **data_ptrs,
                          char **coding_ptrs,
                          std::shared_ptr<std::vector<int>> erasures,
                          int blocksize, EncodeType encode_type, bool repair) {
-
-  if (encode_type == RS || encode_type == OPPO_LRC) {
-    std::vector<int> matrix(m * k, 0);
-    int *rs_matrix = reed_sol_vandermonde_coding_matrix(k, m, 8);
-    memcpy(matrix.data(), rs_matrix, m * k * sizeof(int));
-    free(rs_matrix);
-    if (jerasure_matrix_decode(k, m, 8, matrix.data(), 0, erasures->data(),
-                               data_ptrs, coding_ptrs, blocksize) != -1) {
-      return true;
-    }
-  } else if (encode_type == Azure_LRC_1 || encode_type == Azure_LRC) {
-
+  if (encode_type == Azure_LRC) {
     std::vector<int> matrix((m + real_l) * k, 0);
     lrc_make_matrix(k, m, real_l, matrix.data());
     if (!repair) {

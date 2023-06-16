@@ -2,16 +2,8 @@
 #define META_DEFINITION
 #include "devcommon.h"
 namespace OppoProject {
-enum EncodeType { RS, OPPO_LRC, Azure_LRC_1, Azure_LRC };
-enum PlacementType {
-  Random,
-  Flat,
-  Best_Placement,
-  Best_Best_Placement,
-  Best_Best_Best_Placement,
-  Par_2_random,
-  Par_2_load
-};
+enum EncodeType { Azure_LRC };
+enum PlacementType { Random, Flat, Par_1, Par_2, Par_2_random, Par_2_load };
 typedef std::unordered_map<int, std::unordered_map<int, std::vector<char>>>
     partial_helper;
 typedef struct AZitem {

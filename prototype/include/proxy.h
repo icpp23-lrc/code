@@ -36,10 +36,6 @@ public:
       grpc::ServerContext *context,
       const proxy_proto::ObjectAndPlacement *object_and_placement,
       proxy_proto::SetReply *response) override;
-  grpc::Status WriteBufferAndEncode(
-      grpc::ServerContext *context,
-      const proxy_proto::ObjectAndPlacement *object_and_placement,
-      proxy_proto::SetReply *response) override;
   grpc::Status decodeAndGetObject(
       grpc::ServerContext *context,
       const proxy_proto::ObjectAndPlacement *object_and_placement,
@@ -50,15 +46,6 @@ public:
   grpc::Status helpRepair(grpc::ServerContext *context,
                           const proxy_proto::helpRepairPlan *helpRepairPlan,
                           proxy_proto::helpRepairReply *reply) override;
-
-  grpc::Status
-  dataProxyUpdate(grpc::ServerContext *context,
-                  const proxy_proto::DataProxyUpdatePlan *dataProxyPlan,
-                  proxy_proto::DataProxyReply *reply) override;
-  grpc::Status collectorProxyUpdate(
-      grpc::ServerContext *context,
-      const proxy_proto::CollectorProxyUpdatePlan *collectorProxyPlan,
-      proxy_proto::CollectorProxyReply *reply) override;
 
 private:
   bool init_coordinator();

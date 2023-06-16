@@ -19,8 +19,6 @@ std::string Client::sayHelloToCoordinatorByGrpc(std::string hello) {
   }
 }
 bool Client::SetParameterByGrpc(ECSchema input_ecschema, int alpha) {
-  /*待补充，通过这个函数，要能设置coordinator的编码参数*/
-  /*编码参数存储在变量 m_encode_parameter中*/
   coordinator_proto::Parameter parameter;
   parameter.set_partial_decoding((int)input_ecschema.partial_decoding);
   parameter.set_encodetype((int)input_ecschema.encodetype);
@@ -46,7 +44,6 @@ bool Client::SetParameterByGrpc(ECSchema input_ecschema, int alpha) {
 }
 bool Client::set(std::string key, std::string value, std::string flag) {
 
-  /* grpc*/
   grpc::ClientContext get_proxy_ip_port;
   coordinator_proto::RequestProxyIPPort request;
   coordinator_proto::ReplyProxyIPPort reply;
@@ -55,7 +52,6 @@ bool Client::set(std::string key, std::string value, std::string flag) {
   grpc::Status status = m_coordinator_ptr->uploadOriginKeyValue(
       &get_proxy_ip_port, request, &reply);
 
-  /* grpc*/
   if (!status.ok()) {
     std::cout << "upload stripe failed!" << std::endl;
     return false;
@@ -107,7 +103,6 @@ bool Client::set(std::string key, std::string value, std::string flag) {
     }
   }
   return false;
-  /* grpc*/
 }
 bool Client::get(std::string key, std::string &value) {
   grpc::ClientContext context;
@@ -146,9 +141,6 @@ bool Client::get(std::string key, std::string &value) {
   socket_data.shutdown(asio::ip::tcp::socket::shutdown_receive, ignore_ec);
   socket_data.close(ignore_ec);
   std::cout << "get key: " << key << " valuesize: " << len << std::endl;
-  // for (const auto &c : buf) {
-  //   std::cout << c;
-  // }
   value = std::string(buf.data(), buf.size());
   std::cout << std::endl;
   return true;
@@ -173,50 +165,5 @@ bool Client::simulate_d_read(std::string key, std::string &value) {
   grpc::Status status;
   m_coordinator_ptr->simulate_d_read(&context, request, &reply);
   get(key, value);
-}
-
-bool Client::update(std::string key, int offset, int length) {
-  grpc::ClientContext grpccontext;
-  coordinator_proto::UpdatePrepareRequest request;
-  coordinator_proto::UpdateDataLocation data_location;
-
-  grpc::Status status = m_coordinator_ptr->updateGetLocation(
-      &grpccontext, request, &data_location);
-  if (status.ok()) {
-    if (key != data_location.key())
-      std::cerr
-          << "what!!! coordinator returns other object's update soluuution!!"
-          << std::endl;
-
-    int descending_len = length;
-    std::vector<std::pair<std::string, int>> proxy_ipports;
-    std::vector<int> each_proxy_num;
-    int i = 0;
-    int j = 0;
-    for (i = 0; i < data_location.proxyip_size(); i++) {
-      std::string proxy_ip = data_location.proxyip(i);
-      int proxy_port = data_location.proxyport(i);
-      int count = data_location.num_each_proxy(i);
-      asio::io_context io_context;
-      asio::error_code error;
-      asio::ip::tcp::resolver resolver(io_context);
-      asio::ip::tcp::resolver::results_type endpoint =
-          resolver.resolve(proxy_ip, std::to_string(proxy_port));
-      asio::ip::tcp::socket data_socket(io_context);
-      asio::connect(data_socket, endpoint);
-
-      for (int t = 0; t < count; t++) {
-        int idx = data_location.datashardidx(j);
-        int offset_in_shard = data_location.offsetinshard(j);
-        int length_in_shard = data_location.lengthinshard(j);
-        j++; //!!
-        // asio::write(data_socket,asio::buffer(idx,sizeof(int)),error);
-        // asio::write(data_socket,asio::buffer(offset_in_shard,sizeof(int)),error);
-        // asio::write(data_socket,asio::buffer(length_in_shard,sizeof(int)),error);
-      }
-    }
-  }
-
-  return true;
 }
 } // namespace OppoProject

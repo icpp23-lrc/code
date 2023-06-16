@@ -20,12 +20,10 @@ int main(int argc, char **argv) {
   OppoProject::PlacementType placement_type;
   if (std::string(argv[1]) == "Random") {
     placement_type = OppoProject::Random;
-  } else if (std::string(argv[1]) == "Best_Placement") {
-    placement_type = OppoProject::Best_Placement;
-  } else if (std::string(argv[1]) == "Best_Best_Placement") {
-    placement_type = OppoProject::Best_Best_Placement;
-  } else if (std::string(argv[1]) == "Best_Best_Best_Placement") {
-    placement_type = OppoProject::Best_Best_Best_Placement;
+  } else if (std::string(argv[1]) == "Par_1") {
+    placement_type = OppoProject::Par_1;
+  } else if (std::string(argv[1]) == "Par_2") {
+    placement_type = OppoProject::Par_2;
   } else if (std::string(argv[1]) == "Par_2_random") {
     placement_type = OppoProject::Par_2_random;
   } else if (std::string(argv[1]) == "Par_2_load") {
